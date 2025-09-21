@@ -18,6 +18,9 @@ async function getLeagueDetails() {
 
 
 async function getLineup(entry_id, gw) {
+    if (entry_id == null) {
+        return {"element":[]};
+    }   
     let url = `https://draft.premierleague.com/api/entry/${entry_id}/event/${gw}`;
     const data = await fetch(proxyUrl + url)
         .then((response) => response.json())
@@ -47,4 +50,16 @@ async function getSeasonStats() {
         .then((data) => data);
     SEASON_STATS = data
     return SEASON_STATS;
+}
+
+async function getGWLiveScore(lineup, gw) {
+    getLiveStats(gw).then(stats => {
+        let total_points = 0;
+        for (let i = 0; i < 11; i++) {
+            player = lineup[i];
+            total_points += stats[player["element"]]["stats"]["total_points"];
+        }
+        console.log(`Total points: ${total_points}`);
+        return total_points;
+    });
 }

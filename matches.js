@@ -10,7 +10,6 @@ async function getMatches(gameweek, leagueDetails) {
 function populateMatchesTable(leagueDetails, gameweek) {
 
     getMatches(gameweek, leagueDetails).then(data => {
-        console.log(data)
         let matches = data["matches"];
         let leagueEntries = data["league_entries"];
         let table = document.getElementById("matches-table").getElementsByTagName('tbody')[0];
@@ -20,9 +19,41 @@ function populateMatchesTable(leagueDetails, gameweek) {
             let team1 = leagueEntries.find(entry => entry.id === match.league_entry_1);
             let team2 = leagueEntries.find(entry => entry.id === match.league_entry_2);
             row.insertCell(0).innerHTML = team1 ? (team1.entry_name || "AVERAGE") : "Unknown";
-            row.insertCell(1).innerHTML = match.league_entry_1_points;
-            row.insertCell(2).innerHTML = match.league_entry_2_points;
-            row.insertCell(3).innerHTML = team2 ? (team2.entry_name || "AVERAGE") : "Unknown";
+            if (gameweek == 5) {
+                getLineup(team1.entry_id, gameweek).then(lineup => {
+                    getLiveStats(gameweek).then(stats => {
+                        let total_points = 0;
+                        for (let i = 0; i < 11; i++) {
+                            player = lineup[i];
+                            total_points += stats[player["element"]]["stats"]["total_points"];
+                        }
+                        console.log(`Total points: ${total_points}`);
+                        row.insertCell(1).innerHTML = total_points;
+
+                        getLineup(team2.entry_id, gameweek).then(lineup2 => {
+                            getLiveStats(gameweek).then(stats2 => {
+                                let total_points = 0;
+                                for (let i = 0; i < 11; i++) {
+                                    player = lineup2[i];
+                                    if (player === undefined) continue;
+                                    console.log(player)
+                                    total_points += stats2[player["element"]]["stats"]["total_points"];
+                                }
+                                console.log(`Total points: ${total_points}`);
+                                row.insertCell(2).innerHTML = team2 ? (total_points || match.league_entry_2_points) : "Unknown";
+                                row.insertCell(3).innerHTML = team2 ? (team2.entry_name || "AVERAGE") : "Unknown";
+                            });
+                        });
+                    });
+
+                });
+            
+            } else {
+                row.insertCell(1).innerHTML = match.league_entry_1_points;
+                row.insertCell(2).innerHTML = match.league_entry_2_points;
+                row.insertCell(3).innerHTML = team2 ? (team2.entry_name || "AVERAGE") : "Unknown";
+
+            }
         }
         makeRowsClickable();
     });
@@ -77,7 +108,6 @@ function populateTeamSheet(teamId, side) {
     let total_points = 0
     
     getLineup(entry_id, CURRENT_GW).then(lineup => {
-        console.log(lineup);
         let table = document.createElement("table");
         table.classList.add("modern-table");
         let thead = document.createElement("thead");
