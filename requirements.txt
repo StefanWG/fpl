@@ -1,5 +1,0 @@
-shiny
-pandas
-numpy
-requests
-jinja2

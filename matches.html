@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="utils.js" defer></script>
+    <script src="matches.js" defer></script>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+
+</head>
+<body>
+      <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">FPL</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Standings</a></li>
+                <li><a href="matches.html" class="nav-link active">Matches</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="main-container">
+    <div class="sidebar">
+        <div class="pick-gameweek">
+            <label for="gameweek-select">Select Gameweek:</label>
+            <select id="gameweek-select">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+        <div class="match-list clickable" id="match-list">
+            <table id="matches-table" class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Home Team</th>
+                        <th>Home Points</th>
+                        <th>Away Points</th>
+                        <th>Away Team</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Match rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="content">
+        <div class="team-details" id="left-team-sheet">
+            <!-- Team details will be populated by JavaScript -->
+        </div>
+        <div class="team-details" id="right-team-sheet">
+            <!-- Team details will be populated by JavaScript -->
+        </div>
+    </div>
+    </div>
+</body>
+</html>
