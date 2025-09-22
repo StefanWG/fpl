@@ -54,8 +54,8 @@ getLeagueDetails().then(data => {
         
         row.insertCell(1).innerHTML = team.total_points;
         row.insertCell(2).innerHTML = team.won;
-        row.insertCell(3).innerHTML = team.drawn;
-        row.insertCell(4).innerHTML = team.lost;
+        row.insertCell(3).innerHTML = team.lost;
+        row.insertCell(4).innerHTML = team.drawn;
         row.insertCell(5).innerHTML = team.GF;
         row.insertCell(6).innerHTML = team.GA;
     }
