@@ -161,7 +161,10 @@ getLeagueDetails().then(async data => {
                 if (entry["entry_name"] == null) {
                     entry["entry_name"] = "AVERAGE";
                 }
-                row.insertCell(0).innerHTML = entry["entry_name"];
+                // Create cell and assign the link class
+                let nameCell = row.insertCell(0);
+                nameCell.innerHTML = `${entry["entry_name"]}`;
+                nameCell.className = "team-name-cell";
                 break;
             }
         }

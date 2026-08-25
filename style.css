@@ -319,3 +319,19 @@ body {
     border-color: #38bdf8;
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
 }
+
+/* Team Name Link Styling */
+.modern-table tbody td.team-name-cell {
+    color: #0284c7;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: rgba(2, 132, 199, 0.4);
+    text-underline-offset: 3px;
+    transition: all 0.15s ease;
+}
+
+.modern-table tbody td.team-name-cell:hover {
+    color: #0369a1;
+    text-decoration-color: #0369a1;
+}
