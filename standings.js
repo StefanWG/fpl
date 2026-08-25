@@ -2,7 +2,10 @@ getLeagueDetails().then(async data => {
     let matches = data["matches"];
     let standings = {};
     
-    // Safely determine CURRENT_GW from matches
+    // Track weekly scores per team to calculate xPoints
+    // Structure: { gameweek: { teamId: points } }
+    let weeklyScores = {};
+
     let latestFinishedGW = 1;
     let inProgressGW = null;
 
@@ -10,41 +13,83 @@ getLeagueDetails().then(async data => {
         if (match["finished"]) {
             latestFinishedGW = Math.max(latestFinishedGW, match["event"]);
         } else {
-            // If there's an unfinished match, its event could be active right now
             inProgressGW = match["event"];
-            break; // No need to check further once we find an in-progress gameweek
+            break; // Stop at the first in-progress match, as we only care about the latest
         }
     }
 
-    // Logic: In-progress gameweek first, otherwise the most recent finished gameweek
     CURRENT_GW = inProgressGW !== null ? inProgressGW : latestFinishedGW;
 
-    // Process Standings Data
+    // 1. Process regular match results and record weekly scores
     for (let match of matches) {
+        let gw = match["event"];
+        let t1 = match["league_entry_1"];
+        let t2 = match["league_entry_2"];
+        let p1 = match["league_entry_1_points"];
+        let p2 = match["league_entry_2_points"];
+
+        // Initialize weekly score tracker
+        if (!weeklyScores[gw]) weeklyScores[gw] = {};
+        weeklyScores[gw][t1] = p1;
+        weeklyScores[gw][t2] = p2;
+
         if (!match["finished"]) continue;
-        if (!(match["league_entry_1"] in standings)) {
-            standings[match["league_entry_1"]] = { "total_points": 0, "won": 0, "drawn": 0, "lost": 0, "GF": 0, "GA": 0 };
+
+        if (!(t1 in standings)) {
+            standings[t1] = { "total_points": 0, "x_points": 0, "won": 0, "drawn": 0, "lost": 0, "GF": 0, "GA": 0 };
         }
-        if (!(match["league_entry_2"] in standings)) {
-            standings[match["league_entry_2"]] = { "total_points": 0, "won": 0, "drawn": 0, "lost": 0, "GF": 0, "GA": 0 };
+        if (!(t2 in standings)) {
+            standings[t2] = { "total_points": 0, "x_points": 0, "won": 0, "drawn": 0, "lost": 0, "GF": 0, "GA": 0 };
         }
-        standings[match["league_entry_1"]]["GF"] += match["league_entry_1_points"];
-        standings[match["league_entry_1"]]["GA"] += match["league_entry_2_points"];
-        standings[match["league_entry_2"]]["GF"] += match["league_entry_2_points"];
-        standings[match["league_entry_2"]]["GA"] += match["league_entry_1_points"];
-        if (match["league_entry_1_points"] > match["league_entry_2_points"]) {
-            standings[match["league_entry_1"]]["won"] += 1;
-            standings[match["league_entry_2"]]["lost"] += 1;
-            standings[match["league_entry_1"]]["total_points"] += 3;
-        } else if (match["league_entry_1_points"] < match["league_entry_2_points"]) {
-            standings[match["league_entry_2"]]["won"] += 1;
-            standings[match["league_entry_1"]]["lost"] += 1;
-            standings[match["league_entry_2"]]["total_points"] += 3;
+
+        standings[t1]["GF"] += p1;
+        standings[t1]["GA"] += p2;
+        standings[t2]["GF"] += p2;
+        standings[t2]["GA"] += p1;
+
+        if (p1 > p2) {
+            standings[t1]["won"] += 1;
+            standings[t2]["lost"] += 1;
+            standings[t1]["total_points"] += 3;
+        } else if (p1 < p2) {
+            standings[t2]["won"] += 1;
+            standings[t1]["lost"] += 1;
+            standings[t2]["total_points"] += 3;
         } else {
-            standings[match["league_entry_1"]]["drawn"] += 1;
-            standings[match["league_entry_2"]]["drawn"] += 1;
-            standings[match["league_entry_1"]]["total_points"] += 1;
-            standings[match["league_entry_2"]]["total_points"] += 1;
+            standings[t1]["drawn"] += 1;
+            standings[t2]["drawn"] += 1;
+            standings[t1]["total_points"] += 1;
+            standings[t2]["total_points"] += 1;
+        }
+    }
+
+    // 2. Compute xPoints (All-Play against all other teams for every finished gameweek)
+    for (let gw in weeklyScores) {
+        let teamsInGW = Object.keys(weeklyScores[gw]);
+        if (teamsInGW.length < 2) continue;
+
+        // Check if this gameweek has finished scores
+        let gwFinished = matches.some(m => m["event"] == parseInt(gw) && m["finished"]);
+        if (!gwFinished) continue;
+
+        for (let i = 0; i < teamsInGW.length; i++) {
+            let teamA = teamsInGW[i];
+            let scoreA = weeklyScores[gw][teamA];
+
+            if (!standings[teamA]) continue;
+
+            for (let j = 0; j < teamsInGW.length; j++) {
+                if (i === j) continue;
+                let teamB = teamsInGW[j];
+                let scoreB = weeklyScores[gw][teamB];
+
+                if (scoreA > scoreB) {
+                    standings[teamA]["x_points"] += 3 / (teamsInGW.length - 1);
+                } else if (scoreA === scoreB) {
+                    standings[teamA]["x_points"] += 1 / (teamsInGW.length - 1);
+                }
+                // Loss = 0 points added
+            }
         }
     }
     
@@ -52,9 +97,12 @@ getLeagueDetails().then(async data => {
     for (let team in standings) {
         standings_.push({ "id": team, ...standings[team] });
     }
-    standings_.sort((a, b) => b["total_points"] - a["total_points"] || (b["GF"] - a["GF"]));
+    // Sort primarily by real total points, then goal difference / GF, then xPoints
+    standings_.sort((a, b) => b["total_points"] - a["total_points"] || (b["GF"] - a["GF"]) || (b["x_points"] - a["x_points"]));
     
     let standings_table = document.getElementById("standings").getElementsByTagName('tbody')[0];
+    standings_table.innerHTML = ""; // Clear old rows if reloading
+
     for (let team of standings_) {
         let row = standings_table.insertRow();
         let found = false;
@@ -68,13 +116,22 @@ getLeagueDetails().then(async data => {
                 break;
             }
         }
-        
-        row.insertCell(1).innerHTML = team.total_points;
-        row.insertCell(2).innerHTML = team.won;
-        row.insertCell(3).innerHTML = team.lost;
-        row.insertCell(4).innerHTML = team.drawn;
-        row.insertCell(5).innerHTML = team.GF;
-        row.insertCell(6).innerHTML = team.GA;
+
+        let totalPtsCell = row.insertCell(1);
+        totalPtsCell.innerHTML = team.total_points;
+        totalPtsCell.style.fontWeight = "600";
+        totalPtsCell.style.color = "#0284c7";
+
+        // Format xPoints neatly to 1 decimal place (e.g. 14.5 pts)
+        let xPtsCell = row.insertCell(2);
+        xPtsCell.innerHTML = (team.x_points).toFixed(1);
+
+
+        row.insertCell(3).innerHTML = team.won;
+        row.insertCell(4).innerHTML = team.lost;
+        row.insertCell(5).innerHTML = team.drawn;
+        row.insertCell(6).innerHTML = team.GF;
+        row.insertCell(7).innerHTML = team.GA;
     }
 
     sessionStorage.setItem('currentGW', CURRENT_GW);
