@@ -12,11 +12,19 @@
       <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-logo">FPL</a>
+            <a href="#" class="nav-logo">FPL Draft</a>
             <ul class="nav-links">
                 <li><a href="index.html" class="nav-link active">Standings</a></li>
                 <li><a href="matches.html" class="nav-link">Matches</a></li>
             </ul>
+            <!-- League Selector Dropdown -->
+            <div class="league-selector-container">
+                <select id="league-select" onchange="switchLeague(this.value)">
+                    <option value="10982">A league of their own</option>
+                    <option value="93782">Project 2027</option>
+                    <!-- Add your league IDs here -->
+                </select>
+            </div>
         </div>
     </nav>
     <div class="table-container">

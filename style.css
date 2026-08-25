@@ -288,3 +288,32 @@ body {
     font-weight: 700;
     text-align: center;
 }
+
+/* League Selector Dropdown Styling */
+.league-selector {
+    display: flex;
+    align-items: center;
+}
+
+#league-select {
+    background-color: #0f172a;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#league-select:hover {
+    border-color: #0284c7;
+    background-color: #1e293b;
+}
+
+#league-select:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}

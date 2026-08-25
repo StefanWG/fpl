@@ -1,21 +1,36 @@
-let LEAGUE_ID = 10982;
+let DEFAULT_LEAGUE_ID = 10982;
 let LEAGUE_DETAILS = null;
 let PLAYER_STATS = {};
 let SEASON_STATS = null;
-let CURRENT_GW = 2;
+let CURRENT_GW = 1;
 
-// Local database store
 let LOCAL_DB = {
     liveStats: {},
     lineups: {}
 };
 
+function getSelectedLeague() {
+    return localStorage.getItem('fpl_selected_league') || DEFAULT_LEAGUE_ID;
+}
+
+function switchLeague(leagueId) {
+    localStorage.setItem('fpl_selected_league', leagueId);
+    window.location.reload();
+}
+
 async function getLeagueDetails() {
     if (LEAGUE_DETAILS != null) {
         return LEAGUE_DETAILS;
     }
-    const response = await fetch('data/league_details.json');
-    LEAGUE_DETAILS = await response.json();
+    let leagueId = getSelectedLeague();
+    try {
+        const response = await fetch(`data/leagues/${leagueId}/league_details.json`);
+        LEAGUE_DETAILS = await response.json();
+    } catch (e) {
+        // Fallback to root data folder if legacy structure is used
+        const response = await fetch('data/league_details.json');
+        LEAGUE_DETAILS = await response.json();
+    }
     return LEAGUE_DETAILS;
 }
 
@@ -23,17 +38,26 @@ async function getLineup(entry_id, gw) {
     if (entry_id == null) {
         return {"element":[]};
     }
-    let key = `${entry_id}_${gw}`;
+    let leagueId = getSelectedLeague();
+    let key = `${leagueId}_${entry_id}_gw_${gw}`;
     if (LOCAL_DB.lineups[key]) {
         return LOCAL_DB.lineups[key];
     }
     try {
-        const response = await fetch(`data/lineups/entry_${entry_id}_gw_${gw}.json`);
+        const response = await fetch(`data/leagues/${leagueId}/lineups/entry_${entry_id}_gw_${gw}.json`);
         const data = await response.json();
-        LOCAL_DB.lineups[key] = data.picks || [];
+        LOCAL_DB.lineups[key] = data; // Keep full object so `subs` can be accessed
         return LOCAL_DB.lineups[key];
     } catch (e) {
-        return [];
+        try {
+            // Fallback to legacy path
+            const response = await fetch(`data/lineups/entry_${entry_id}_gw_${gw}.json`);
+            const data = await response.json();
+            LOCAL_DB.lineups[key] = data;
+            return LOCAL_DB.lineups[key];
+        } catch (err) {
+            return {};
+        }
     }
 }
 
@@ -61,14 +85,10 @@ async function getSeasonStats() {
     return SEASON_STATS;
 }
 
-async function getGWLiveScore(lineup, gw) {
-    let stats = await getLiveStats(gw);
-    let total_points = 0;
-    for (let i = 0; i < 11; i++) {
-        let player = lineup[i];
-        if (player && stats[player["element"]]) {
-            total_points += stats[player["element"]]["stats"]["total_points"];
-        }
+// Sync dropdown state on page load
+document.addEventListener("DOMContentLoaded", () => {
+    let select = document.getElementById("league-select");
+    if (select) {
+        select.value = getSelectedLeague();
     }
-    return total_points;
-}
+});
