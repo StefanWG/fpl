@@ -97,6 +97,15 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-size: 0.75rem;
+    position: relative;
+    user-select: none;
+}
+
+/* Sort Arrow Styling */
+.sort-arrow {
+    font-size: 0.65rem;
+    color: #38bdf8;
+    margin-left: 4px;
 }
 
 .modern-table tbody tr {
@@ -115,17 +124,11 @@ body {
     color: #334155;
 }
 
-/* Custom Tooltip Style for Table Headers */
-.modern-table th {
-    position: relative;
-    cursor: help; /* Changes cursor to a question mark/help icon on hover */
-}
-
-/* Custom Tooltip Styling */
+/* Custom Tooltip Styling (Isolated from sorting classes) */
 .modern-table th[title]:hover::after {
     content: attr(title);
     position: absolute;
-    bottom: 125%; /* Position slightly above the header */
+    bottom: 125%;
     left: 50%;
     transform: translateX(-50%);
     background-color: #0f172a;
@@ -134,10 +137,10 @@ body {
     font-size: 0.75rem;
     font-weight: 500;
     line-height: 1.2;
-    text-transform: none; /* Keep description sentence casing */
-    white-space: normal;  /* Allows wrapping if description is long */
+    text-transform: none;
+    white-space: normal;
     width: max-content;
-    max-width: 220px;     /* Prevents tooltip from becoming too wide */
+    max-width: 220px;
     text-align: center;
     border-radius: 6px;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
@@ -145,7 +148,6 @@ body {
     pointer-events: none;
 }
 
-/* Optional little arrow pointing down from the tooltip box */
 .modern-table th[title]:hover::before {
     content: "";
     position: absolute;

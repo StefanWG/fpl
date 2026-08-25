@@ -196,3 +196,70 @@ getLeagueDetails().then(async data => {
     sessionStorage.setItem('currentGW', CURRENT_GW);
     return data;
 });
+
+function makeTableSortable() {
+    const table = document.getElementById("standings");
+    if (!table) return;
+
+    const headers = table.querySelectorAll("thead th");
+    
+    headers.forEach((th, index) => {
+        th.style.cursor = "pointer";
+        
+        // Ensure an arrow span exists inside the header
+        if (!th.querySelector(".sort-arrow")) {
+            const arrowSpan = document.createElement("span");
+            arrowSpan.className = "sort-arrow";
+            arrowSpan.innerHTML = "";
+            th.appendChild(arrowSpan);
+        }
+
+        if (th.hasAttribute("data-sort-initialized")) return;
+        th.setAttribute("data-sort-initialized", "true");
+        
+        th.addEventListener("click", () => {
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            const isDescending = th.classList.contains("sort-desc");
+            
+            headers.forEach(h => {
+                h.classList.remove("sort-asc", "sort-desc");
+                let arrow = h.querySelector(".sort-arrow");
+                if (arrow) arrow.innerHTML = "";
+            });
+            
+            if (isDescending) {
+                th.classList.remove("sort-desc");
+                th.classList.add("sort-asc");
+            } else {
+                th.classList.remove("sort-asc");
+                th.classList.add("sort-desc");
+            }
+
+            let arrow = th.querySelector(".sort-arrow");
+            if (arrow) {
+                arrow.innerHTML = isDescending ? " &#9650;" : " &#9660;"; // &#9650; = ▲, &#9660; = ▼
+            }
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.querySelectorAll("td")[index].innerText.trim();
+                const cellB = rowB.querySelectorAll("td")[index].innerText.trim();
+
+                const numA = parseFloat(cellA.replace(/[^0-9.-]+/g, ""));
+                const numB = parseFloat(cellB.replace(/[^0-9.-]+/g, ""));
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return !isDescending ? numB - numA : numA - numB;
+                } else {
+                    return !isDescending 
+                        ? cellB.localeCompare(cellA) 
+                        : cellA.localeCompare(cellB);
+                }
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+}
+
+makeTableSortable();
