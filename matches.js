@@ -112,7 +112,7 @@ async function populateTeamSheet(teamId, side) {
     let total_points = 0;
     let i = 0;
 
-    lineup.forEach(player => {
+    lineup["picks"].forEach(player => {
         let gameweekStatsPlayer = stats[player["element"]] ? stats[player["element"]]["stats"] : { total_points: 0, minutes: 0 };
         let seasonStatsPlayer = seasonStats["elements"].find(e => e.id === player["element"]);
         if (!seasonStatsPlayer) return;
