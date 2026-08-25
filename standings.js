@@ -86,7 +86,7 @@ getLeagueDetails().then(async data => {
             let subsList = [];
             
             try {
-                const response = await fetch(`data/lineups/entry_${entryDbId}_gw_${gw}.json`);
+                const response = await fetch(`data/leagues/${getSelectedLeague()}/lineups/entry_${entryDbId}_gw_${gw}.json`);
                 const jsonContent = await response.json();
                 if (jsonContent && jsonContent["subs"]) {
                     subsList = jsonContent["subs"];
