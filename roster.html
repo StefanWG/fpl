@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Roster</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">🏆 Fantasy League</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Standings</a></li>
+                <li><a href="matches.html" class="nav-link">Matches</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Roster Container -->
+    <div class="table-container">
+        <h2 id="team-title" style="padding: 1.2rem 1rem; color: #0f172a; border-bottom: 1px solid #e2e8f0;">Team Roster</h2>
+        <table class="modern-table" id="roster-table">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Position</th>
+                    <th>Total Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Roster rows will be injected here dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="roster.js"></script>
+</body>
+</html>

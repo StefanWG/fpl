@@ -153,16 +153,23 @@ getLeagueDetails().then(async data => {
 
     for (let team of standings_) {
         let row = standings_table.insertRow();
-        let found = false;
+        let matchedEntry = null;
+
         for (let entry of data["league_entries"]) {
             if (entry["id"] == team["id"]) {
+                matchedEntry = entry;
                 if (entry["entry_name"] == null) {
                     entry["entry_name"] = "AVERAGE";
                 }
                 row.insertCell(0).innerHTML = entry["entry_name"];
-                found = true;
                 break;
             }
+        }
+
+        // Store team ID / entry ID on the row dataset for easy retrieval
+        if (matchedEntry) {
+            row.dataset.entryId = matchedEntry["entry_id"];
+            row.dataset.teamId = matchedEntry["id"];
         }
 
         let totalPtsCell = row.insertCell(1);
@@ -191,6 +198,20 @@ getLeagueDetails().then(async data => {
          // Sub Points Column
         let subCell = row.insertCell(8);
         subCell.innerHTML = team.sub_points;
+
+        row.addEventListener("click", () => {
+            const entryDbId = row.dataset.entryId;
+            const leagueId = getSelectedLeague();
+
+            console.log(`Clicked on team with entryDbId: ${entryDbId} in league: ${leagueId}`);
+            
+            if (entryDbId && entryDbId !== "undefined") {
+                // Redirect to roster page with query parameters
+                window.location.href = `roster.html?league=${leagueId}&entry=${entryDbId}`;
+            } else {
+                console.warn("Roster data not available for this entry.");
+            }
+        });
     }
 
     sessionStorage.setItem('currentGW', CURRENT_GW);
