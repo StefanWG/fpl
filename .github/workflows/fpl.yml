@@ -1,0 +1,33 @@
+name: Update FPL Data Every 5 Minutes
+
+on:
+  schedule:
+    # Runs every 5 minutes using cron syntax
+    - cron: '*/5 * * * *'
+  # Allows you to manually trigger it from the GitHub Actions tab anytime
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run data fetcher script
+        run: python update_data.py
+
+      - name: Commit and push changes if data changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update FPL data [skip ci]" && git push)

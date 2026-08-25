@@ -1,65 +1,74 @@
-let LEAGUE_ID = 106254;
+let LEAGUE_ID = 10982;
 let LEAGUE_DETAILS = null;
 let PLAYER_STATS = {};
 let SEASON_STATS = null;
 let CURRENT_GW = 2;
 
-
-const proxyUrl = 'https://corsproxy.io/?url=';
+// Local database store
+let LOCAL_DB = {
+    liveStats: {},
+    lineups: {}
+};
 
 async function getLeagueDetails() {
-    let url = `https://draft.premierleague.com/api/league/${LEAGUE_ID}/details`;
-    const data = await fetch(proxyUrl+ url)
-        .then((response) => response.json())
-        .then((data) => data);
-    LEAGUE_DETAILS = data;
-    return data;
+    if (LEAGUE_DETAILS != null) {
+        return LEAGUE_DETAILS;
+    }
+    const response = await fetch('data/league_details.json');
+    LEAGUE_DETAILS = await response.json();
+    return LEAGUE_DETAILS;
 }
-
 
 async function getLineup(entry_id, gw) {
     if (entry_id == null) {
         return {"element":[]};
-    }   
-    let url = `https://draft.premierleague.com/api/entry/${entry_id}/event/${gw}`;
-    const data = await fetch(proxyUrl + url)
-        .then((response) => response.json())
-        .then((data) => data.picks);
-    return data;
+    }
+    let key = `${entry_id}_${gw}`;
+    if (LOCAL_DB.lineups[key]) {
+        return LOCAL_DB.lineups[key];
+    }
+    try {
+        const response = await fetch(`data/lineups/entry_${entry_id}_gw_${gw}.json`);
+        const data = await response.json();
+        LOCAL_DB.lineups[key] = data.picks || [];
+        return LOCAL_DB.lineups[key];
+    } catch (e) {
+        return [];
+    }
 }
 
 async function getLiveStats(gameweek) {
     if (gameweek in PLAYER_STATS) {
         return PLAYER_STATS[gameweek];
     }
-    let url = `https://draft.premierleague.com/api/event/${gameweek}/live`;
-    const data = await fetch(proxyUrl + url)
-        .then((response) => response.json())
-        .then((data) => data);
-    PLAYER_STATS[gameweek] = data["elements"];
-    return PLAYER_STATS[gameweek];
+    try {
+        const response = await fetch(`data/live_gw_${gameweek}.json`);
+        const data = await response.json();
+        PLAYER_STATS[gameweek] = data["elements"];
+        return PLAYER_STATS[gameweek];
+    } catch (e) {
+        PLAYER_STATS[gameweek] = {};
+        return PLAYER_STATS[gameweek];
+    }
 }
 
 async function getSeasonStats() {
     if (SEASON_STATS != null) {
         return SEASON_STATS;
     } 
-    let url = `https://draft.premierleague.com/api/bootstrap-static`;
-    const data = await fetch(proxyUrl + url)
-        .then((response) => response.json())
-        .then((data) => data);
-    SEASON_STATS = data
+    const response = await fetch('data/bootstrap-static.json');
+    SEASON_STATS = await response.json();
     return SEASON_STATS;
 }
 
 async function getGWLiveScore(lineup, gw) {
-    getLiveStats(gw).then(stats => {
-        let total_points = 0;
-        for (let i = 0; i < 11; i++) {
-            player = lineup[i];
+    let stats = await getLiveStats(gw);
+    let total_points = 0;
+    for (let i = 0; i < 11; i++) {
+        let player = lineup[i];
+        if (player && stats[player["element"]]) {
             total_points += stats[player["element"]]["stats"]["total_points"];
         }
-        console.log(`Total points: ${total_points}`);
-        return total_points;
-    });
+    }
+    return total_points;
 }

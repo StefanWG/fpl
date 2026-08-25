@@ -1,56 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPL Draft - Matches & Lineups</title>
     <script src="utils.js" defer></script>
     <script src="matches.js" defer></script>
-
     <link rel="stylesheet" type="text/css" href="style.css">
-
-
 </head>
 <body>
-      <!-- Navigation Bar -->
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-logo">FPL</a>
+            <a href="#" class="nav-logo">🏆 FPL Draft Live</a>
             <ul class="nav-links">
                 <li><a href="index.html" class="nav-link">Standings</a></li>
                 <li><a href="matches.html" class="nav-link active">Matches</a></li>
             </ul>
         </div>
     </nav>
+
     <div class="main-container">
-    <div class="sidebar">
-        <div class="pick-gameweek">
-            <label for="gameweek-select">Select Gameweek:</label>
-            <select id="gameweek-select">
-                <!-- Options will be populated by JavaScript -->
-            </select>
+        <!-- Sidebar Controls & Match Fixtures -->
+        <div class="sidebar">
+            <div class="pick-gameweek">
+                <label for="gameweek-select">Select Gameweek:</label>
+                <select id="gameweek-select">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="match-list clickable" id="match-list">
+                <table id="matches-table" class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Home</th>
+                            <th>Pts</th>
+                            <th>Pts</th>
+                            <th>Away</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Match rows populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="match-list clickable" id="match-list">
-            <table id="matches-table" class="modern-table">
-                <thead>
-                    <tr>
-                        <th>Home Team</th>
-                        <th>Home Points</th>
-                        <th>Away Points</th>
-                        <th>Away Team</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Match rows will be populated by JavaScript -->
-                </tbody>
-            </table>
+
+        <!-- Lineup Inspection Panels -->
+        <div class="content">
+            <div class="team-details" id="left-team-sheet">
+                <p style="text-align: center; color: #94a3b8; margin-top: 5rem;">👈 Click a fixture on the left to view home team lineup and live player points.</p>
+            </div>
+            <div class="team-details" id="right-team-sheet">
+                <p style="text-align: center; color: #94a3b8; margin-top: 5rem;">👈 Click a fixture on the left to view away team lineup and live player points.</p>
+            </div>
         </div>
-    </div>
-    <div class="content">
-        <div class="team-details" id="left-team-sheet">
-            <!-- Team details will be populated by JavaScript -->
-        </div>
-        <div class="team-details" id="right-team-sheet">
-            <!-- Team details will be populated by JavaScript -->
-        </div>
-    </div>
     </div>
 </body>
 </html>

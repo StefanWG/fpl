@@ -1,10 +1,27 @@
-getLeagueDetails().then(data => {
+getLeagueDetails().then(async data => {
     let matches = data["matches"];
     let standings = {};
+    
+    // Safely determine CURRENT_GW from matches
+    let latestFinishedGW = 1;
+    let inProgressGW = null;
+
     for (let match of matches) {
-        if (!match["finished"]) continue
-        console.log(match);
-        CURRENT_GW = Math.max(match["event"], CURRENT_GW);
+        if (match["finished"]) {
+            latestFinishedGW = Math.max(latestFinishedGW, match["event"]);
+        } else {
+            // If there's an unfinished match, its event could be active right now
+            inProgressGW = match["event"];
+            break; // No need to check further once we find an in-progress gameweek
+        }
+    }
+
+    // Logic: In-progress gameweek first, otherwise the most recent finished gameweek
+    CURRENT_GW = inProgressGW !== null ? inProgressGW : latestFinishedGW;
+
+    // Process Standings Data
+    for (let match of matches) {
+        if (!match["finished"]) continue;
         if (!(match["league_entry_1"] in standings)) {
             standings[match["league_entry_1"]] = { "total_points": 0, "won": 0, "drawn": 0, "lost": 0, "GF": 0, "GA": 0 };
         }
@@ -30,7 +47,8 @@ getLeagueDetails().then(data => {
             standings[match["league_entry_2"]]["total_points"] += 1;
         }
     }
-    let standings_ = []
+    
+    let standings_ = [];
     for (let team in standings) {
         standings_.push({ "id": team, ...standings[team] });
     }
@@ -39,7 +57,6 @@ getLeagueDetails().then(data => {
     let standings_table = document.getElementById("standings").getElementsByTagName('tbody')[0];
     for (let team of standings_) {
         let row = standings_table.insertRow();
-        // Find team name
         let found = false;
         for (let entry of data["league_entries"]) {
             if (entry["id"] == team["id"]) {
@@ -59,14 +76,7 @@ getLeagueDetails().then(data => {
         row.insertCell(5).innerHTML = team.GF;
         row.insertCell(6).innerHTML = team.GA;
     }
-    CURRENT_GW += 1; // 1 more than last finished
+
     sessionStorage.setItem('currentGW', CURRENT_GW);
-
-    return data
-    
-}).then(data =>{
-    console.log(data["league_entries"]);
-
+    return data;
 });
-
-
