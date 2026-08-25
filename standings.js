@@ -122,10 +122,17 @@ getLeagueDetails().then(async data => {
         totalPtsCell.style.fontWeight = "600";
         totalPtsCell.style.color = "#0284c7";
 
-        // Format xPoints neatly to 1 decimal place (e.g. 14.5 pts)
+        // Format xPoints neatly to 2 decimal place (e.g. 14.50 pts)
         let xPtsCell = row.insertCell(2);
-        xPtsCell.innerHTML = (team.x_points).toFixed(1);
-
+        xPtsCell.innerHTML = (team.x_points).toFixed(2);
+        xPtsCell.style.fontWeight = "600";
+        if (team.x_points > team.total_points) {
+            xPtsCell.style.color = "#16a34a"; // green for overperforming
+        } else if (team.x_points < team.total_points) {
+            xPtsCell.style.color = "#dc2626"; // red for underperforming
+        } else {
+            xPtsCell.style.color = "#0284c7"; // blue for matching performance
+        }
 
         row.insertCell(3).innerHTML = team.won;
         row.insertCell(4).innerHTML = team.lost;
