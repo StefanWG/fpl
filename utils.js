@@ -49,15 +49,7 @@ async function getLineup(entry_id, gw) {
         LOCAL_DB.lineups[key] = data; // Keep full object so `subs` can be accessed
         return LOCAL_DB.lineups[key];
     } catch (e) {
-        try {
-            // Fallback to legacy path
-            const response = await fetch(`data/lineups/entry_${entry_id}_gw_${gw}.json`);
-            const data = await response.json();
-            LOCAL_DB.lineups[key] = data;
-            return LOCAL_DB.lineups[key];
-        } catch (err) {
-            return {};
-        }
+        return {};
     }
 }
 
