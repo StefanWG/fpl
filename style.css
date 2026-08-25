@@ -72,7 +72,7 @@ body {
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    overflow: hidden;
+    overflow: visible;
     margin: 2rem auto;
     max-width: 1200px;
     border: 1px solid #e2e8f0;
@@ -113,6 +113,50 @@ body {
     padding: 0.85rem 1rem;
     vertical-align: middle;
     color: #334155;
+}
+
+/* Custom Tooltip Style for Table Headers */
+.modern-table th {
+    position: relative;
+    cursor: help; /* Changes cursor to a question mark/help icon on hover */
+}
+
+/* Custom Tooltip Styling */
+.modern-table th[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%; /* Position slightly above the header */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-transform: none; /* Keep description sentence casing */
+    white-space: normal;  /* Allows wrapping if description is long */
+    width: max-content;
+    max-width: 220px;     /* Prevents tooltip from becoming too wide */
+    text-align: center;
+    border-radius: 6px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Optional little arrow pointing down from the tooltip box */
+.modern-table th[title]:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 24%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #0f172a transparent transparent transparent;
+    z-index: 1000;
+    pointer-events: none;
 }
 
 /* Main Container Layout for Matches */
